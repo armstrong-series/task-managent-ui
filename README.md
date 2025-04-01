@@ -2,9 +2,9 @@
 
 This is in affiliation with a GraphQL API (Built by Laravel).
 
-## Stack
+## Stack/Technology
 
-[Vue](https://vuejs.org/guide/quick-start.html/) + [Typescript](https://www.typescriptlang.org/) + [TailwindCSS]
+[Vue](https://vuejs.org/guide/quick-start.html/) + [Typescript](https://www.typescriptlang.org/) + [TailwindCSS](https://tailwindcss.com/)
 
 
 
@@ -20,7 +20,16 @@ npm install
 npm run dev
 ```
 
-### Compile and Minify for Production
+### Set environment variable
+
+```sh
+cp .env.test .env 
+
+In .env file add
+VITE_API_BASE_URL=
+```
+
+### Run for Production
 
 ```sh
 npm run build
