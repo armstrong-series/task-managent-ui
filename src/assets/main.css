@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.toast {
+  max-width: 320px; 
+  border-radius: 8px; 
+  font-size: 14px; 
+  padding: 10px 15px; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  line-height: 1.4; 
+}
+
+.toast-success {
+  background-color: #2ecc71; 
+  border-left: 4px solid #27ae60; 
+}
+
+
+.toast-error {
+  background-color: #e74c3c; 
+  border-left: 4px solid #c0392b; 
+}
+
+
+.toast-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 13px;
+}
+
+
+#toast-container > .toast-progress {
+  height: 3px; 
+  background-color: rgba(255, 255, 255, 0.8); 
+}
