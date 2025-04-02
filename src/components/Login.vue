@@ -105,13 +105,13 @@ export default defineComponent({
 
                 if (result.success) {
                     localStorage.setItem('token', result.token);
-                    toastr.success(result.message, 'Success');
+                    toastr.info(result.message);
                     router.push('/dashboard');
                 } else {
-                    toastr.error(result.message, 'Error');
+                    toastr.error(result.message);
                 }
             } catch (error) {
-                toastr.error('Login failed. Please try again.', 'Error');
+                toastr.error('Login failed. Please try again.');
             } finally {
                 loading.value = false;
             }
