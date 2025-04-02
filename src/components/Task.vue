@@ -403,56 +403,41 @@
                             </svg>
                         </div>
                         <div class="flex flex-col px-6 py-5 bg-gray-50">
+                            <p class="mb-2 font-semibold text-gray-700">Title</p>
+                            <input type="text" v-model="form.title" placeholder="Enter Title"
+                                class="p-5 mb-5 bg-white border border-gray-200 rounded shadow-sm">
+                        </div>
+                        <div class="flex flex-col px-6 py-5 bg-gray-50">
                             <p class="mb-2 font-semibold text-gray-700">Description</p>
-                            <textarea placeholder="Enter description..."
+                            <textarea v-model="form.description" placeholder="Enter description..."
                                 class="p-5 mb-5 bg-white border border-gray-200 rounded shadow-sm h-36"></textarea>
                             <div class="flex flex-col sm:flex-row items-center mb-5 sm:space-x-5">
                                 <div class="w-full sm:w-1/2">
-                                    <p class="mb-2 font-semibold text-gray-700">Customer Response</p>
-                                    <select
+                                    <p class="mb-2 font-semibold text-gray-700">Status</p>
+                                    <select v-model="form.status"
                                         class="w-full p-5 bg-white border border-gray-200 rounded shadow-sm appearance-none">
-                                        <option value="0">Add service</option>
+                                        <option value=""></option>
+                                        <option value="pending">Pending</option>
+                                        <option value="completed">Completed</option>
                                     </select>
                                 </div>
                                 <div class="w-full sm:w-1/2 mt-2 sm:mt-0">
-                                    <p class="mb-2 font-semibold text-gray-700">Next step</p>
-                                    <select
-                                        class="w-full p-5 bg-white border border-gray-200 rounded shadow-sm appearance-none">
-                                        <option value="0">Book Appointment</option>
-                                    </select>
+                                    <p class="mb-2 font-semibold text-gray-700">Due Date</p>
+                                    <input v-model="form.due_date" type="date"
+                                        class="w-full p-5 bg-white border border-gray-200 rounded shadow-sm" />
                                 </div>
                             </div>
                             <hr />
-                            <div class="flex items-center mt-5 mb-3 space-x-4">
-                                <input class="inline-flex rounded-full" type="checkbox" id="check1" name="check1" />
-                                <label class="inline-flex font-semibold text-gray-400" for="check1">
-                                    Add a crew
-                                </label>
-                                <input class="inline-flex" type="checkbox" id="check2" name="check2" checked />
-                                <label class="inline-flex font-semibold text-blue-500" for="check2">
-                                    Add a specific agent
-                                </label>
-                            </div>
-                            <div
-                                class="flex flex-row items-center justify-between p-5 bg-white border border-gray-200 rounded shadow-sm">
-                                <div class="flex flex-row items-center">
-                                    <img class="w-10 h-10 mr-3 rounded-full"
-                                        src="https://randomuser.me/api/portraits/lego/7.jpg" alt="" />
-                                    <div class="flex flex-col">
-                                        <p class="font-semibold text-gray-800">Xu Lin Bashir</p>
-                                        <p class="text-gray-400">table.co</p>
-                                    </div>
-                                </div>
-                                <h1 class="font-semibold text-red-400 cursor-pointer">Remove</h1>
-                            </div>
+                    
                         </div>
                         <div
                             class="flex flex-row items-center justify-between p-5 bg-white border-t border-gray-200 rounded-bl-lg rounded-br-lg">
                             <p @click="showModal = false" class="font-semibold text-gray-600 cursor-pointer">
                                 Cancel
                             </p>
-                            <button @click="saveTask" class="px-4 py-2 text-white font-semibold bg-blue-500 rounded">
-                               Submit
+                            <button @click="handleCreateTask" :disabled="loading"
+                                class="px-4 py-2 text-white font-semibold bg-blue-500 rounded">
+                                {{ loading ? 'Creating...' : 'Proceed' }}
                             </button>
                         </div>
                     </div>
@@ -460,30 +445,83 @@
             </div>
         </div>
     </div>
+    <Footer />
 
 </template>
 
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import SideMenu from '@/components/Partials/SideMenu.vue';
+    import { defineComponent, ref, reactive } from 'vue';
+    import SideMenu from '@/components/Partials/SideMenu.vue';
+    import Footer from './Partials/Footer.vue';
+    import type { TaskForm, TaskData } from '@/types/task';
+    import axios from 'axios';
+    import toastr from 'toastr';
 
 export default defineComponent({
     name: 'Task',
     components: {
-        SideMenu
+        SideMenu,
+        Footer
     },
 
     setup() {
 
         const showModal = ref(false);
+        const loading = ref(false);
 
-        const saveTask = () => {
+        const form = reactive<TaskForm>({
+            title: '',
+            status: '',
+            due_date: '',
+            description: '',
+        });
 
-            console.log('Task saved!');
-            showModal.value = false;
+        const baseUrl = import.meta.env.VITE_API_BASE_URL + '/graphql';
+
+        const handleCreateTask = async () => {
+            loading.value = true;
+
+            try {
+                const response = await axios.post(baseUrl, {
+                    query: `
+                            mutation CreateTask($title: String!, $status: String!, $due_date: String!, $description: String) {
+                            createTask(title: $title, status: $status, due_date: $due_date, description: $description) {
+                                id
+                                title
+                                status
+                                due_date
+                                description
+                            }
+                            }
+                        `,
+                    variables: {
+                        title: form.title,
+                        status: form.status,
+                        due_date: form.due_date,
+                        description: form.description || null,
+                    },
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+                    },
+                });
+
+                const result: TaskData = response.data.data.createTask;
+
+                toastr.success('Request completed!', 'Success');
+                console.log('Task created:', result);
+                Object.assign(form, { title: '', status: '', due_date: '', description: '' });
+                showModal.value = false;
+
+            } catch (error) {
+                toastr.error('Failed to create task. Please try again.', 'Error');
+                console.error('Error creating task:', error);
+            } finally {
+                loading.value = false;
+            }
         };
-
 
 
         const toggleDropdown = (event: Event) => {
@@ -517,7 +555,9 @@ export default defineComponent({
             toggleDropdown,
             toggleCheckbox,
             showModal,
-            saveTask,
+            form,
+            loading,
+            handleCreateTask,
         };
     },
 });

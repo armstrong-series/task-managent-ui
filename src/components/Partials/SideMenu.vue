@@ -93,11 +93,6 @@
                 </li>
             </ul>
             <ul class="mb-4 flex flex-col gap-1">
-                <li class="mx-3.5 mt-4 mb-2">
-                    <p
-                        class="block antialiased font-sans text-sm leading-normal text-white font-black uppercase opacity-75">
-                        auth pages</p>
-                </li>
                 <li>
                     <a class="" href="#" @click.prevent="handleLogout">
                         <button
